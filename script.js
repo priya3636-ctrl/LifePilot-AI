@@ -1,10 +1,49 @@
 
-// =====================================
-// LIFEPILOT - PERSONAL PRODUCTIVITY APP
-// =====================================
+/* =====================================
+   LIFEPILOT - BROWSER AI ENGINE
+===================================== */
+
+let lifePilotEnginePromise = null;
+
+async function getLifePilotEngine(onProgress) {
+    if (!navigator.gpu) {
+        throw new Error(
+            "Your browser does not support WebGPU. Please use a compatible browser."
+        );
+    }
+
+    if (!lifePilotEnginePromise) {
+        lifePilotEnginePromise = (async () => {
+            const webllm = await import(
+                "https://esm.run/@mlc-ai/web-llm"
+            );
+
+            return await webllm.CreateMLCEngine(
+                "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+                {
+                    initProgressCallback: (progress) => {
+                        if (onProgress) {
+                            onProgress(progress.text);
+                        }
+                    }
+                }
+            );
+        })().catch((error) => {
+            lifePilotEnginePromise = null;
+            throw error;
+        });
+    }
+
+    return await lifePilotEnginePromise;
+}
 
 
-// 1. GET HTML ELEMENTS
+/* =====================================
+   LIFEPILOT - PERSONAL PRODUCTIVITY APP
+===================================== */
+
+
+/* 1. GET HTML ELEMENTS */
 
 const taskInput = document.getElementById("taskInput");
 const priorityInput = document.getElementById("priority");
@@ -33,10 +72,11 @@ const notes = document.getElementById("notes");
 const notesStatus = document.getElementById("notesStatus");
 
 
-// 2. DATE FUNCTIONS
+/* 2. DATE FUNCTIONS */
 
 function getLocalDate() {
     const now = new Date();
+
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
@@ -58,29 +98,32 @@ const hour = new Date().getHours();
 
 document.getElementById("greeting").textContent =
     hour < 12 ? "Good morning!" :
-    hour < 17 ? "Good afternoon!" : "Good evening!";
+    hour < 17 ? "Good afternoon!" :
+    "Good evening!";
 
 dueDateInput.value = today;
 
 
-// 3. LOAD DATA FROM LOCALSTORAGE
+/* 3. LOAD DATA FROM LOCAL STORAGE */
 
 let tasks = [];
 
 try {
-    const savedTasks = JSON.parse(
-        localStorage.getItem("lifePilotTasks")
-    );
+    const savedTasks = localStorage.getItem("lifePilotTasks");
+    tasks = savedTasks ? JSON.parse(savedTasks) : [];
 
-    tasks = Array.isArray(savedTasks) ? savedTasks : [];
+    if (!Array.isArray(tasks)) {
+        tasks = [];
+    }
 } catch (error) {
+    console.error("Unable to load saved tasks:", error);
     tasks = [];
 }
 
 notes.value = localStorage.getItem("lifePilotNotes") || "";
 
 
-// 4. SAVE TASKS
+/* 4. SAVE TASKS */
 
 function saveTasks() {
     localStorage.setItem(
@@ -92,10 +135,9 @@ function saveTasks() {
 }
 
 
-// 5. ADD NEW TASK
+/* 5. ADD NEW TASK */
 
 function addTask() {
-
     const name = taskInput.value.trim();
 
     if (!name) {
@@ -133,10 +175,9 @@ taskInput.addEventListener("keydown", function(event) {
 });
 
 
-// 6. FORMAT DATE
+/* 6. FORMAT DATE */
 
 function formatDate(dateString) {
-
     if (!dateString) return "No due date";
 
     const date = new Date(dateString + "T00:00:00");
@@ -149,17 +190,15 @@ function formatDate(dateString) {
 }
 
 
-// 7. DISPLAY TASKS
+/* 7. DISPLAY TASKS */
 
 function displayTasks() {
-
     taskList.innerHTML = "";
 
     const searchTerm = searchInput.value.toLowerCase();
     const selectedFilter = filterStatus.value;
 
     const filteredTasks = tasks.filter(task => {
-
         const matchesSearch =
             task.name.toLowerCase().includes(searchTerm);
 
@@ -172,7 +211,6 @@ function displayTasks() {
     });
 
     filteredTasks.forEach(task => {
-
         const item = document.createElement("div");
         item.className = "task-item";
 
@@ -180,7 +218,6 @@ function displayTasks() {
             item.classList.add("completed");
         }
 
-        // Left side
         const left = document.createElement("div");
         left.className = "task-left";
 
@@ -227,7 +264,6 @@ function displayTasks() {
         left.appendChild(checkbox);
         left.appendChild(details);
 
-        // Right side
         const actions = document.createElement("div");
         actions.className = "task-actions";
 
@@ -263,10 +299,9 @@ function displayTasks() {
 }
 
 
-// 8. EDIT TASK
+/* 8. EDIT TASK */
 
 function editTask(id) {
-
     const task = tasks.find(item => item.id === id);
 
     if (!task) return;
@@ -289,10 +324,9 @@ function editTask(id) {
 
     const validPriority = ["High", "Medium", "Low"];
 
-    const normalizedPriority =
-        validPriority.find(
-            item => item.toLowerCase() === newPriority.trim().toLowerCase()
-        );
+    const normalizedPriority = validPriority.find(
+        item => item.toLowerCase() === newPriority.trim().toLowerCase()
+    );
 
     if (!normalizedPriority) {
         alert("Please enter High, Medium or Low.");
@@ -306,10 +340,9 @@ function editTask(id) {
 }
 
 
-// 9. DELETE TASK
+/* 9. DELETE TASK */
 
 function deleteTask(id) {
-
     const confirmDelete = confirm(
         "Are you sure you want to delete this task?"
     );
@@ -322,10 +355,9 @@ function deleteTask(id) {
 }
 
 
-// 10. UPDATE TASK
+/* 10. UPDATE TASK */
 
 function updateTask(id, updates) {
-
     tasks = tasks.map(task =>
         task.id === id ? { ...task, ...updates } : task
     );
@@ -334,10 +366,9 @@ function updateTask(id, updates) {
 }
 
 
-// 11. UPDATE STATISTICS
+/* 11. UPDATE STATISTICS */
 
 function updateStatistics() {
-
     const total = tasks.length;
 
     const completed = tasks.filter(
@@ -378,10 +409,9 @@ function updateStatistics() {
 }
 
 
-// 12. SMART PRODUCTIVITY ASSISTANT
+/* 12. SMART PRODUCTIVITY ASSISTANT */
 
 function updateSuggestion() {
-
     const pending = tasks.filter(
         task => !task.completed
     );
@@ -401,7 +431,6 @@ function updateSuggestion() {
     };
 
     pending.sort((a, b) => {
-
         const aOverdue = a.dueDate && a.dueDate < today;
         const bOverdue = b.dueDate && b.dueDate < today;
 
@@ -422,7 +451,7 @@ function updateSuggestion() {
 
     const nextTask = pending[0];
 
-    const reason = nextTask.dueDate < today
+    const reason = nextTask.dueDate && nextTask.dueDate < today
         ? "This task is overdue."
         : nextTask.priority === "High"
             ? "This task has high priority."
@@ -433,10 +462,9 @@ function updateSuggestion() {
 }
 
 
-// 13. DAILY PLANNER
+/* 13. DAILY PLANNER */
 
 function updatePlanner() {
-
     todayPlanner.innerHTML = "";
 
     const todaysTasks = tasks.filter(
@@ -444,7 +472,6 @@ function updatePlanner() {
     );
 
     if (todaysTasks.length === 0) {
-
         const message = document.createElement("p");
         message.className = "empty-message";
         message.textContent = "No activities scheduled for today.";
@@ -454,7 +481,6 @@ function updatePlanner() {
     }
 
     todaysTasks.forEach(task => {
-
         const item = document.createElement("div");
         item.className = "planner-item";
 
@@ -474,26 +500,24 @@ function updatePlanner() {
 }
 
 
-// 14. SEARCH AND FILTER
+/* 14. SEARCH AND FILTER */
 
 searchInput.addEventListener("input", displayTasks);
 filterStatus.addEventListener("change", displayTasks);
 
 
-// 15. AUTOMATIC NOTES SAVING
+/* 15. AUTOMATIC NOTES SAVING */
 
 notes.addEventListener("input", function() {
-
     localStorage.setItem("lifePilotNotes", notes.value);
 
     notesStatus.textContent = "Saved successfully";
 });
 
 
-// 16. RENDER COMPLETE APPLICATION
+/* 16. RENDER COMPLETE APPLICATION */
 
 function renderApp() {
-
     displayTasks();
     updateStatistics();
     updateSuggestion();
@@ -501,21 +525,19 @@ function renderApp() {
 }
 
 
-// 17. INITIALIZE APPLICATION
+/* 17. INITIALIZE APPLICATION */
 
 renderApp();
 
-// =====================================
-// LIFEPILOT VOICE AGENT
-// =====================================
+
+/* =====================================
+   LIFEPILOT - VOICE AGENT
+===================================== */
 
 const voiceBtn = document.getElementById("voiceBtn");
 const voiceStatus = document.getElementById("voiceStatus");
 const voiceMessage = document.getElementById("voiceMessage");
 const voiceTranscript = document.getElementById("voiceTranscript");
-
-
-// Check browser support
 
 const SpeechRecognition =
     window.SpeechRecognition ||
@@ -525,10 +547,9 @@ let recognition = null;
 let isListening = false;
 
 
-// Voice response
+/* VOICE RESPONSE */
 
 function speakResponse(message) {
-
     if (!("speechSynthesis" in window)) {
         voiceMessage.textContent = message;
         return;
@@ -548,10 +569,9 @@ function speakResponse(message) {
 }
 
 
-// Initialize voice recognition
+/* INITIALIZE VOICE RECOGNITION */
 
 if (SpeechRecognition) {
-
     recognition = new SpeechRecognition();
 
     recognition.lang = "en-IN";
@@ -559,8 +579,7 @@ if (SpeechRecognition) {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = function () {
-
+    recognition.onstart = function() {
         isListening = true;
 
         voiceBtn.classList.add("listening");
@@ -568,9 +587,7 @@ if (SpeechRecognition) {
         voiceMessage.textContent = "Speak your command now.";
     };
 
-
-    recognition.onresult = function (event) {
-
+    recognition.onresult = function(event) {
         const command =
             event.results[0][0].transcript.toLowerCase().trim();
 
@@ -579,9 +596,7 @@ if (SpeechRecognition) {
         processVoiceCommand(command);
     };
 
-
-    recognition.onerror = function (event) {
-
+    recognition.onerror = function(event) {
         voiceStatus.textContent = "Voice recognition issue";
 
         const messages = {
@@ -595,9 +610,7 @@ if (SpeechRecognition) {
             messages[event.error] || "Please try speaking again.";
     };
 
-
-    recognition.onend = function () {
-
+    recognition.onend = function() {
         isListening = false;
 
         voiceBtn.classList.remove("listening");
@@ -606,42 +619,32 @@ if (SpeechRecognition) {
             voiceStatus.textContent = "Ready to listen";
         }
     };
-
 }
 
 
-// 1. Add task through voice
+/* 1. ADD TASK THROUGH VOICE */
 
 function addTaskByVoice(command) {
-
     let taskName = command
         .replace(/^(please\s+)?(add|create)\s+(a\s+)?(new\s+)?task\s*/i, "")
         .replace(/^to\s+/i, "")
         .trim();
 
     if (!taskName || taskName === "task") {
-
         speakResponse("Please say the name of the task.");
         return;
     }
 
     const newTask = {
-
         id: Date.now().toString() +
             Math.random().toString(16).slice(2),
 
         name: taskName,
-
         priority: "Medium",
-
         category: "Personal",
-
         dueDate: getLocalDate(),
-
         completed: false,
-
         createdAt: new Date().toISOString()
-
     };
 
     tasks.push(newTask);
@@ -654,31 +657,25 @@ function addTaskByVoice(command) {
 }
 
 
-// 2. Process voice commands
+/* 2. PROCESS VOICE COMMANDS */
 
 function processVoiceCommand(command) {
-
     voiceStatus.textContent = "Processing command...";
 
-    // Add task
     if (
         command.startsWith("add task") ||
         command.startsWith("add a task") ||
         command.startsWith("create task") ||
         command.startsWith("create a task")
     ) {
-
         addTaskByVoice(command);
     }
 
-    // Show pending tasks
     else if (
         command.includes("pending task") ||
         command.includes("show my pending")
     ) {
-
         filterStatus.value = "Pending";
-
         searchInput.value = "";
 
         displayTasks();
@@ -696,14 +693,11 @@ function processVoiceCommand(command) {
         );
     }
 
-    // Show completed tasks
     else if (
         command.includes("completed task") ||
         command.includes("finished task")
     ) {
-
         filterStatus.value = "Completed";
-
         searchInput.value = "";
 
         displayTasks();
@@ -721,12 +715,10 @@ function processVoiceCommand(command) {
         );
     }
 
-    // Read productivity summary
     else if (
         command.includes("productivity summary") ||
         command.includes("read my summary")
     ) {
-
         const completed = tasks.filter(
             task => task.completed
         ).length;
@@ -743,12 +735,10 @@ function processVoiceCommand(command) {
         );
     }
 
-    // Count completed tasks
     else if (
         command.includes("how many") &&
         (command.includes("completed") || command.includes("finished"))
     ) {
-
         const count = tasks.filter(
             task => task.completed
         ).length;
@@ -758,26 +748,20 @@ function processVoiceCommand(command) {
         );
     }
 
-    // Suggest next task
     else if (
         command.includes("what should i do next") ||
         command.includes("next task") ||
         command.includes("suggest a task")
     ) {
-
         updateSuggestion();
 
-        speakResponse(
-            suggestionText.textContent
-        );
+        speakResponse(suggestionText.textContent);
     }
 
-    // Open notes
     else if (
         command.includes("open notes") ||
         command.includes("my notes")
     ) {
-
         document.getElementById("notes").scrollIntoView({
             behavior: "smooth"
         });
@@ -785,12 +769,10 @@ function processVoiceCommand(command) {
         speakResponse("Your personal notes are now open.");
     }
 
-    // Open dashboard
     else if (
         command.includes("open dashboard") ||
         command.includes("show dashboard")
     ) {
-
         document.getElementById("dashboard").scrollIntoView({
             behavior: "smooth"
         });
@@ -798,14 +780,11 @@ function processVoiceCommand(command) {
         speakResponse("Your dashboard is now open.");
     }
 
-    // Show all tasks
     else if (
         command.includes("show all tasks") ||
         command.includes("all tasks")
     ) {
-
         filterStatus.value = "All";
-
         searchInput.value = "";
 
         displayTasks();
@@ -817,12 +796,10 @@ function processVoiceCommand(command) {
         speakResponse("Here are all your tasks.");
     }
 
-    // Help
     else if (
         command.includes("help") ||
         command.includes("commands")
     ) {
-
         speakResponse(
             "You can ask me to add a task, show pending tasks, " +
             "read your productivity summary, suggest your next task, " +
@@ -830,9 +807,7 @@ function processVoiceCommand(command) {
         );
     }
 
-    // Unknown command
     else {
-
         speakResponse(
             "Sorry, I did not understand that command. " +
             "Please try saying add a task or show pending tasks."
@@ -843,43 +818,41 @@ function processVoiceCommand(command) {
 }
 
 
-// 3. Microphone button
+/* 3. MICROPHONE BUTTON */
 
-voiceBtn.addEventListener("click", function () {
-
+voiceBtn.addEventListener("click", function() {
     if (!recognition) {
-
         voiceStatus.textContent = "Not supported";
 
         voiceMessage.textContent =
-            "Please use Google Chrome or Microsoft Edge for voice recognition.";
+            "Please use a supported browser for voice recognition.";
 
         return;
     }
 
     if (isListening) {
-
         recognition.stop();
-
     } else {
-
         window.speechSynthesis.cancel();
 
         voiceStatus.textContent = "Starting microphone...";
 
         recognition.start();
     }
-
 });
 
-// ======================================
-// LIFEPILOT - LOCAL AI CHAT CONNECTION
-// ======================================
+
+/* =====================================
+   LIFEPILOT - WEBLLM AI CHAT
+===================================== */
 
 const aiInput = document.getElementById("ai-chat-input");
 const aiSendButton = document.getElementById("ai-chat-send");
 const aiMessages = document.getElementById("ai-chat-messages");
 const aiStatus = document.getElementById("ai-chat-status");
+
+
+/* SEND MESSAGE TO BROWSER AI */
 
 async function sendMessageToLifePilot() {
     const message = aiInput.value.trim();
@@ -889,52 +862,66 @@ async function sendMessageToLifePilot() {
         return;
     }
 
-    // Display user's message
     const userMessage = document.createElement("div");
     userMessage.className = "user-message";
     userMessage.textContent = message;
+
     aiMessages.appendChild(userMessage);
 
     aiInput.value = "";
     aiSendButton.disabled = true;
-    aiStatus.textContent = "LifePilot is thinking...";
+    aiStatus.textContent = "Loading LifePilot AI...";
 
     try {
-        const response = await fetch("http://127.0.0.1:8001/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: message
-            })
+        const engine = await getLifePilotEngine((progressText) => {
+            aiStatus.textContent =
+                progressText || "Loading AI model...";
         });
 
-        if (!response.ok) {
-            throw new Error("Backend request failed");
-        }
+        aiStatus.textContent = "LifePilot is generating a response...";
 
-        const data = await response.json();
-        if (data.status !== "success") throw new Error(data.reply || "AI service returned an error");
+        const response = await engine.chat.completions.create({
+            messages: [
+                {
+                    role: "system",
+                    content:
+                        "You are LifePilot, a friendly personal productivity assistant. " +
+                        "Help users manage tasks, plan their day, organize notes, " +
+                        "improve productivity, and stay focused. " +
+                        "Give clear, practical and encouraging answers."
+                },
+                {
+                    role: "user",
+                    content: message
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 300
+        });
 
         const aiReply = document.createElement("div");
         aiReply.className = "ai-message";
-        aiReply.textContent = data.reply || "No reply received.";
+
+        aiReply.textContent =
+            response.choices[0]?.message?.content ||
+            "No reply received.";
 
         aiMessages.appendChild(aiReply);
-        aiStatus.textContent =
-            data.status === "success"
-                ? "LifePilot AI is ready"
-                : "AI connection needs attention.";
+
+        aiStatus.textContent = "LifePilot AI is ready";
 
     } catch (error) {
         const errorMessage = document.createElement("div");
         errorMessage.className = "ai-message";
+
         errorMessage.textContent =
-            "Unable to connect to LifePilot AI. Please check that the backend and Ollama are running.";
+            "Unable to start LifePilot AI. Please check WebGPU support " +
+            "and your internet connection, then try again.";
 
         aiMessages.appendChild(errorMessage);
-        aiStatus.textContent = "Connection failed.";
+
+        aiStatus.textContent = "AI connection needs attention.";
+
         console.error("LifePilot AI Error:", error);
 
     } finally {
@@ -944,11 +931,15 @@ async function sendMessageToLifePilot() {
     }
 }
 
-// Send button click
+
+/* SEND BUTTON AND ENTER KEY */
+
 if (aiInput && aiSendButton && aiMessages && aiStatus) {
     aiSendButton.addEventListener("click", sendMessageToLifePilot);
+
     aiInput.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") sendMessageToLifePilot();
+        if (event.key === "Enter") {
+            sendMessageToLifePilot();
+        }
     });
 }
-
