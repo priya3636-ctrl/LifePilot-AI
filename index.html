@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifePilot | Personal Productivity</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">L</div>
+            <div>
+                <h2>LifePilot</h2>
+                <small>PERSONAL WORKSPACE</small>
+            </div>
+        </div>
+
+        <p class="menu-label">WORKSPACE</p>
+
+        <nav>
+            <a href="#dashboard" class="nav-link active">▦ &nbsp; Dashboard</a>
+            <a href="#tasks" class="nav-link">✓ &nbsp; My Tasks</a>
+            <a href="#planner" class="nav-link">▣ &nbsp; Daily Planner</a>
+            <a href="#notes" class="nav-link">▤ &nbsp; My Notes</a>
+            <a href="#ai-chat-section" class="nav-link">✦ &nbsp; AI Companion</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="assistant-mini">
+                <div class="assistant-icon">✦</div>
+                <h3>Stay focused!</h3>
+                <p>Small steps every day lead to big achievements.</p>
+            </div>
+            <small>LifePilot © 2026</small>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">YOUR PERSONAL WORKSPACE</p>
+                <h1 id="greeting">Good day!</h1>
+                <p id="today" class="date-text"></p>
+            </div>
+
+            <div class="profile">
+                <div class="avatar">LP</div>
+                <span>My Workspace</span>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <section id="dashboard">
+
+            <div class="welcome-banner">
+                <div>
+                    <span class="banner-tag">YOUR DAILY JOURNEY</span>
+                    <h2>Make today count.</h2>
+                    <p>Plan your work, focus on priorities and celebrate your progress.</p>
+                    <a href="#tasks" class="banner-button">Manage my tasks →</a>
+                </div>
+                <div class="banner-art">✦</div>
+            </div>
+
+            <div class="section-heading">
+                <div>
+                    <h2>Productivity Overview</h2>
+                    <p>Here's your progress at a glance.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Total Tasks</span>
+                        <span class="stat-icon blue">▤</span>
+                    </div>
+                    <h2 id="totalTasks">0</h2>
+                    <p>All your tasks</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Completed</span>
+                        <span class="stat-icon green">✓</span>
+                    </div>
+                    <h2 id="completedTasks">0</h2>
+                    <p>Tasks finished</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Pending</span>
+                        <span class="stat-icon orange">◷</span>
+                    </div>
+                    <h2 id="pendingTasks">0</h2>
+                    <p>Tasks remaining</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Overdue</span>
+                        <span class="stat-icon red">!</span>
+                    </div>
+                    <h2 id="overdueTasks">0</h2>
+                    <p>Past due date</p>
+                </div>
+
+            </div>
+
+            <!-- Progress -->
+            <div class="content-card progress-card">
+                <div class="section-heading">
+                    <div>
+                        <h2>Your Productivity</h2>
+                        <p>Track your overall task completion.</p>
+                    </div>
+                    <strong id="progressPercent">0%</strong>
+                </div>
+
+                <div class="progress-track">
+                    <div id="progressBar" class="progress-fill"></div>
+                </div>
+                <p id="progressMessage">Start adding tasks to track your progress.</p>
+            </div>
+
+        </section>
+
+        <!-- Smart Assistant -->
+        <section class="assistant-card">
+            <div class="assistant-icon large">✦</div>
+            <div>
+                <span class="eyebrow">LIFEPILOT SMART ASSISTANT</span>
+                <h2>Your next best move</h2>
+                <p id="suggestionText">
+                    Add a task and I'll help you identify what to focus on first.
+                </p>
+            </div>
+        </section>
+        
+<!-- VOICE AGENT -->
+<section id="voice-agent" class="voice-agent-card">
+
+    <div class="voice-header">
+        <div>
+            <span class="eyebrow">YOUR PERSONAL VOICE AGENT</span>
+            <h2>Talk to LifePilot</h2>
+            <p>Manage your day using simple voice commands.</p>
+        </div>
+        <div class="voice-logo">🎙️</div>
+    </div>
+
+    <div class="voice-center">
+
+        <button id="voiceBtn" class="voice-button" type="button">
+            🎤
+        </button>
+
+        <h3 id="voiceStatus">Ready to listen</h3>
+
+        <p id="voiceMessage">
+            Click the microphone and speak your command.
+        </p>
+
+    </div>
+
+    <div class="voice-transcript">
+        <strong>You said:</strong>
+        <p id="voiceTranscript">Your voice command will appear here.</p>
+    </div>
+
+    <div class="voice-examples">
+        <h3>Try these commands</h3>
+        <div class="command-list">
+            <span>"Add a task to complete ML lab"</span>
+            <span>"Show pending tasks"</span>
+            <span>"How many tasks are completed?"</span>
+            <span>"What should I do next?"</span>
+            <span>"Read my productivity summary"</span>
+            <span>"Open my notes"</span>
+        </div>
+    </div>
+
+</section>
+        <!-- Task Manager -->
+        <section id="tasks" class="content-card task-section">
+
+            <div class="section-heading">
+                <div>
+                    <h2>My Tasks</h2>
+                    <p>Manage your priorities and daily responsibilities.</p>
+                </div>
+            </div>
+
+            <div class="task-form">
+                <input type="text" id="taskInput"
+                       placeholder="What do you need to accomplish?">
+
+                <div class="form-row">
+
+                    <select id="priority">
+                        <option value="High">High Priority</option>
+                        <option value="Medium" selected>Medium Priority</option>
+                        <option value="Low">Low Priority</option>
+                    </select>
+
+                    <select id="category">
+                        <option value="Personal">Personal</option>
+                        <option value="Study">Study</option>
+                        <option value="Work">Work</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                    <input type="date" id="dueDate">
+
+                    <button id="addTaskBtn" class="primary-btn">
+                        + Add Task
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="task-controls">
+                <input type="search" id="searchInput"
+                       placeholder="Search your tasks...">
+
+                <select id="filterStatus">
+                    <option value="All">All Tasks</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+
+            <div id="taskList" class="task-list"></div>
+
+            <p id="emptyMessage" class="empty-message">
+                No tasks found. Add your first task!
+            </p>
+
+        </section>
+
+        <!-- Daily Planner -->
+        <section id="planner" class="content-card planner-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Daily Planner</h2>
+                    <p>See your activities organized by date.</p>
+                </div>
+            </div>
+
+            <h3 class="subheading">Today's Schedule</h3>
+            <div id="todayPlanner" class="planner-list"></div>
+        </section>
+
+        <!-- Notes -->
+        <section id="notes" class="content-card notes-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Personal Notes</h2>
+                    <p>Keep your ideas, goals and important thoughts here.</p>
+                </div>
+                <span id="notesStatus" class="saved-label">Saved locally</span>
+            </div>
+
+            <textarea id="notes"
+                placeholder="Write your thoughts, plans, goals and reminders here..."></textarea>
+        </section>
+
+<!-- LifePilot AI Chat -->
+<section class="ai-chat-section" id="ai-chat-section">
+
+    <h2>LifePilot AI Assistant</h2>
+    <p>Your personal AI productivity companion</p>
+
+    <div id="ai-chat-messages">
+        <div class="ai-message">
+            Hello! I'm LifePilot. How can I help you today?
+        </div>
+    </div>
+
+    <div class="ai-chat-input">
+        <input
+            type="text"
+            id="ai-chat-input"
+            placeholder="Ask LifePilot anything..."
+        >
+
+        <button id="ai-chat-send">Send</button>
+    </div>
+
+    <p id="ai-chat-status">AI Assistant Ready</p>
+
+</section>
+
+        <footer>
+            <p>Made with purpose. Managed with LifePilot. ✦</p>
+        </footer>
+
+    </main>
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
